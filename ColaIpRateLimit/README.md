@@ -1,7 +1,5 @@
 # Cola.ColaIpRateLimit 中间件框架
 
-[![Version](https://flat.badgen.net/nuget/v/Cola.ColaIpRateLimit?label=version)](https://github.com/odinGitGmail/Cola.ColaIpRateLimit) [![download](https://flat.badgen.net/nuget/dt/Cola.ColaIpRateLimit)](https://www.nuget.org/packages/Cola.ColaIpRateLimit) [![commit](https://flat.badgen.net/github/last-commit/odinGitGmail/Cola.ColaIpRateLimit)](https://flat.badgen.net/github/last-commit/odinGitGmail/Cola.ColaIpRateLimit) [![Blog](https://flat.badgen.net/static/blog/odinsam.com)](https://odinsam.com)
-
 #### config 配置
 ```json
 {
