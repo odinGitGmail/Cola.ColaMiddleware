@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <Title>Cola.ColaMiddleware</Title>
+        <Authors>OdinSam</Authors>
+        <Description>Cola.ColaMiddleware 中间件框架</Description>
+        <Copyright>copyRight © 2023 OdinSam</Copyright>
+        <PackageProjectUrl>https://github.com/odinGitGmail/Cola.ColaMiddleware</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/odinGitGmail/Cola.ColaMiddleware</RepositoryUrl>
+        <PackageTags>Cola;Middleware</PackageTags>
+        <Version>1.0.1</Version>
+        <PackageIcon>icon.png</PackageIcon>
+        <AssemblyVersion>1.0.1</AssemblyVersion>
+        <FileVersion>1.0.1</FileVersion>
+        <PackageReadmeFile>./readme.md</PackageReadmeFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="icon.png"  Pack="true" PackagePath="\" />
+        <EmbeddedResource Include="icon.png">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <None Update="ColaSwagger\readme.md">
+          <Pack>true</Pack>
+          <PackagePath>\</PackagePath>
+        </None>
+        <None Update="ColaIpRateLimit\README.md">
+          <Pack>true</Pack>
+          <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.12" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Cola.Core\Cola.Core.csproj" />
+    </ItemGroup>
+
+</Project>
