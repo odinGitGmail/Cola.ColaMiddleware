@@ -1,4 +1,6 @@
 ﻿using AspNetCoreRateLimit;
+using AspNetCoreRateLimit.Redis;
+using Cola.Core.Utils.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -6,11 +8,21 @@ namespace Cola.ColaMiddleware.ColaIpRateLimit;
 
 public static class ColaIpRateLimitInject
 {
-    public static IServiceCollection AddSingletonColaCache(
+    public static IServiceCollection AddSingletonColaIpRateLimit(
         this IServiceCollection services,
-        Action<IpRateLimitOptions> action)
+        Action<ColaIpRateLimitOptions> action)
     {
-        
+        var colaIpRateLimitOptions = new ColaIpRateLimitOptions();
+        action(colaIpRateLimitOptions);
+        if (string.Compare(colaIpRateLimitOptions.IpRateLimitCache, "Memory", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            services.AddMemoryCache();
+        }
+
+        if (string.Compare(colaIpRateLimitOptions.IpRateLimitCache, "Redis", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            services.AddRedisRateLimiting();
+        }
         services.Configure(action);
         services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
         services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
@@ -19,9 +31,23 @@ public static class ColaIpRateLimitInject
         return services;
     }
     
-    public static IServiceCollection AddSingletonColaCache(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddSingletonColaIpRateLimit(this IServiceCollection services, IConfiguration config)
     {
-        services.Configure<IpRateLimitOptions>(config.GetSection("IpRateLimit"));
+        
+        var colaIpRateLimitOptions = config.GetSection(SystemConstant.CONSTANT_COLAIPRATELIMIT_SECTION);
+        var cache = colaIpRateLimitOptions.GetSection("IpRateLimitCache").Get<string>();
+       
+        if (string.Compare(cache, "Memory", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            services.AddMemoryCache();
+        }
+
+        if (string.Compare(cache, "Redis", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            services.AddRedisRateLimiting();
+        }
+        services.AddDistributedMemoryCache();
+        services.Configure<IpRateLimitOptions>(config.GetSection(SystemConstant.CONSTANT_COLAIPRATELIMIT_SECTION));
         services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
         services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
         services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();

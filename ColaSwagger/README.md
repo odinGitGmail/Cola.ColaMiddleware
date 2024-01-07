@@ -25,7 +25,16 @@
 ```
 #### 使用 ColaMiddleware 中间件
 ```csharp
+builder.Configuration.AddJsonFile("appsettings.json");
+var config = builder.Configuration;
+
+// 注释并添加swagger注入
+// builder.Services.AddSwaggerGen();
 builder.Services.AddColaSwagger(config);
+
+// 注释并添加中间件
+// app.UseSwagger();
+// app.UseSwaggerUI();
 app.UseColaSwagger("/swagger/v1/swagger.json", "WebApi V1",null);
 ```
 

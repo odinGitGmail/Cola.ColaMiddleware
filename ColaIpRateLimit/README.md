@@ -1,9 +1,16 @@
 # Cola.ColaIpRateLimit 中间件框架
 
-#### config 配置
-```json
+#### config 配置 更详细配置请参看 [详细配置](https://github.com/stefanprodan/AspNetCoreRateLimit/wiki/IpRateLimitMiddleware#setup) 包括了
+IP速率限制 - IpRateLimiting  
+IP速率限制策略 -  IpRateLimitPolicies
+Client速率限制 -  ClientRateLimiting
+Client速率限制策略 - ClientRateLimitPolicies
+```json IP速率限制
 {
-  "IpRateLimiting": {
+  // IP速率限制
+  "ColaIpRateLimit": {
+    // 这里暂时只支持 Memory 和 Redis 两种方式(默认使用 Memory).  如果使用 redis缓存，则需要再注入IpRateLimit之前优先注入redis
+    "IpRateLimitCache": "Memory",
     // false则全局将应用限制，并且仅应用具有作为端点的规则* 。 true则限制将应用于每个端点，如{HTTP_Verb}{PATH}
     "EnableEndpointRateLimiting": true,
     // false则拒绝的API调用不会添加到调用次数计数器上
@@ -26,9 +33,75 @@
     // 具体的策略，根据不同需求配置不同端点即可， Period的单位可以是s, m, h, d，Limint是单位时间内的允许访问的次数
     "GeneralRules": [
       {
+        // 5秒 3次
         "Endpoint": "*:/api/values/test",
         "Period": "5s",
         "Limit": 3
+      }
+    ]
+  }，
+  // IP速率限制策略
+  "IpRateLimitPolicies": {
+    "IpRules": [
+      {
+        "Ip": "XXX.XXX.XXX.XXX",
+        "Rules": [
+          {
+            "Endpoint": "*",
+            "Period": "1s",
+            "Limit": 10
+          },
+          {
+            "Endpoint": "*",
+            "Period": "1m",
+            "Limit": 1000
+          }
+        ]
+      }
+    ]
+  },
+  // Client速率限制
+  "ClientRateLimiting": {
+    "EnableEndpointRateLimiting": true,
+    "ClientIdHeader": "X-ClientId",
+    "EndpointWhitelist": [],
+    "ClientWhitelist": [],
+    "QuotaExceededResponse": {
+      "Content": "{{\"code\":429,\"type\":\"error\",\"message\":\"访问人数过多,请稍后重试!\",\"result\":null,\"extras\":null}}",
+      "ContentType": "application/json",
+      "StatusCode": 429
+    },
+    "HttpStatusCode": 429,
+    "GeneralRules": [
+      {
+        "Endpoint": "*",
+        "Period": "1s",
+        "Limit": 10
+      },
+      {
+        "Endpoint": "*",
+        "Period": "1m",
+        "Limit": 1000
+      }
+    ]
+  },
+  // Client速率限制策略
+  "ClientRateLimitPolicies": {
+    "ClientRules": [
+      {
+        "ClientId": "xxx-xxx",
+        "Rules": [
+          {
+            "Endpoint": "*",
+            "Period": "1s",
+            "Limit": 10
+          },
+          {
+            "Endpoint": "*",
+            "Period": "1m",
+            "Limit": 1000
+          }
+        ]
       }
     ]
   }
@@ -36,68 +109,11 @@
 ```
 #### 使用 ColaMiddleware 中间件
 ```csharp
-builder.Services.AddColaSwagger(config);
-app.UseColaSwagger("/swagger/v1/swagger.json", "WebApi V1",null);
-```
+builder.Configuration.AddJsonFile("appsettings.json");
+var config = builder.Configuration;
+// 添加 IpRateLimit 注入 默认使用内存缓存，如果使用redis缓存
+builder.Services.AddSingletonColaIpRateLimit(config);
 
-
-#### 注意: 如果使用xml注释需要修改 csproj 配置，添加允许自动生成xml
-```xml
-<PropertyGroup>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
-</PropertyGroup>
-```
-
-#### 普通注释
-```csharp
-/// <summary>
-/// 这是一个例子
-/// </summary>
-/// <remarks>
-/// 描述：这是一个带参数的GET请求
-/// Web API
-/// </remarks>
-/// <param name="id">主键ID</param>
-/// <returns>测试字符串</returns>
-[HttpGet("{id}")]
-public ActionResult<string> Get(int id) {
-     return $"你请求的ID是：{id}";
-}
-```
-
-#### 当入参/出参返回object或者匿名类时
-```csharp
-/// <summary>
-/// 这是一个例子
-/// </summary>
-/// <remarks>
-/// 描述：这是一个带参数的GET请求
-/// Web API
-/// </remarks>
-/// <param name="id">主键ID</param>
-/// <returns>测试字符串</returns>
-[HttpGet("{id}")]
-[ProducesResponseType(typeof(xxx),200)]
-public Object[] Get(int id) {
-     return $"你请求的ID是：{id}";
-}
-```
-
-#### 隐藏接口, 有接口但是不想让别人看到
-```csharp
-/// <summary>
-/// 这是一个例子
-/// </summary>
-/// <remarks>
-/// 描述：这是一个带参数的GET请求
-/// Web API
-/// </remarks>
-/// <param name="id">主键ID</param>
-/// <returns>测试字符串</returns>
-[HttpGet("{id}")]
-[ApiExplorerSettings(IgnoreApi =true)]
-public ActionResult<string> Get(int id) {
-     return $"你请求的ID是：{id}";
-}
+// 添加 IpRateLimit 中间件，尽量添加在管道到外层
+app.UseIpRateLimiting();
 ```

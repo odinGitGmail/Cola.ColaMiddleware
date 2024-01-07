@@ -17,7 +17,6 @@ public static class ColaSwaggerInject
         var colaSwaggerConfig = new ColaSwaggerConfigOption();
         action(colaSwaggerConfig);
         return InjectColaSwagger(services, colaSwaggerConfig);
-        
     }
     
     public static IServiceCollection AddColaSwagger(this IServiceCollection services, IConfiguration config)
