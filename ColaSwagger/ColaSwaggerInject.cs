@@ -1,16 +1,20 @@
 ﻿using System.Reflection;
 using Cola.Core.Utils.Constants;
 using Cola.CoreUtils.Extensions;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Cola.ColaMiddleware.ColaSwagger;
-
+/// <summary>
+/// ColaSwaggerInject - cola swagger inject
+/// </summary>
 public static class ColaSwaggerInject
 {
-    public static IServiceCollection AddSingletonColaCache(
+    public static IServiceCollection AddColaSwagger(
         this IServiceCollection services,
         Action<ColaSwaggerConfigOption> action)
     {
@@ -22,79 +26,86 @@ public static class ColaSwaggerInject
     public static IServiceCollection AddColaSwagger(this IServiceCollection services, IConfiguration config)
     {
         var colaSwaggerConfig = config.GetSection(SystemConstant.CONSTANT_COLASWAGGER_SECTION).Get<ColaSwaggerConfigOption>();
-        colaSwaggerConfig = colaSwaggerConfig ?? new ColaSwaggerConfigOption();
         return InjectColaSwagger(services, colaSwaggerConfig);
     }
 
-    private static IServiceCollection InjectColaSwagger(IServiceCollection services, ColaSwaggerConfigOption colaSwaggerConfigOption)
+    private static IServiceCollection InjectColaSwagger(IServiceCollection services,
+        ColaSwaggerConfigOption colaSwaggerConfigOptions)
     {
-        //注册Swagger
-        return services.AddSwaggerGen(u =>
+        var provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
+        // swagger
+        services.AddSwaggerGen(c =>
         {
-            u.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            // 排序方式
+            c.OrderActionsBy(o => o.HttpMethod);
+            foreach (var item in provider.ApiVersionDescriptions)
             {
-                Version = colaSwaggerConfigOption.Version,
-                Title = colaSwaggerConfigOption.Title,
-                Description = colaSwaggerConfigOption.Description,
-                Contact = new OpenApiContact
+                var option = colaSwaggerConfigOptions.ColaSwaggerConfigModels.Single(c => c.Version == item.GroupName);
+                c.SwaggerDoc(item.GroupName, new OpenApiInfo
                 {
-                    Name = colaSwaggerConfigOption.OpenApiContact.Name,
-                    Url = colaSwaggerConfigOption.OpenApiContact.Url,
-                    Email = colaSwaggerConfigOption.OpenApiContact.Email
-                },
-                License = new OpenApiLicense()
-                {
-                    Name = colaSwaggerConfigOption.OpenApiLicense.Name,
-                    Url = colaSwaggerConfigOption.OpenApiLicense.Url,
-                }
-            });
-            
-            #region 读取xml信息
-
-            if (colaSwaggerConfigOption.EnableXmlComment)
-            {
-                // 使用反射获取xml文件，并构造出文件的路径
-                var xmlFile = $"{Assembly.GetEntryAssembly()!.GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                if (File.Exists(xmlPath))
-                {
-                    // 启用xml注释，该方法第二个参数启用控制器的注释，默认为false.
-                    u.IncludeXmlComments(xmlPath, true);
-                }
-
-                if (colaSwaggerConfigOption.ViewModelNamespaceFullPath.StringIsNotNullOrEmpty())
-                {
-                    // 使用反射获取xml文件，并构造出文件的路径
-                    var modelXmlFile = $"{colaSwaggerConfigOption.ViewModelNamespaceFullPath}.xml";
-                    var modelXmlPath = Path.Combine(AppContext.BaseDirectory, modelXmlFile);
-                    if (File.Exists(modelXmlPath))
+                    Title = $"{option.Title} {item.GroupName}",
+                    Description = option.Description,
+                    Version = item.ApiVersion.MajorVersion.ToString() + "." + item.ApiVersion.MinorVersion,
+                    Contact = new OpenApiContact()
                     {
-                        // 启用xml注释，该方法第二个参数启用控制器的注释，默认为false.
-                        u.IncludeXmlComments(modelXmlPath, true);
+                        Name = option.OpenApiContact.Name,
+                        Url = option.OpenApiContact.Url,
+                        Email = option.OpenApiContact.Email
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = option.OpenApiLicense.Name,
+                        Url = option.OpenApiLicense.Url
                     }
-                }
+                });
+
             }
-            
-            #endregion
-            
+
+            // 重载方式
+            c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
+            foreach (var name in Directory.GetFiles(AppContext.BaseDirectory, "*.*",
+                         SearchOption.AllDirectories).Where(f => Path.GetExtension(f).ToLower() == ".xml"))
+            {
+                c.IncludeXmlComments(name, includeControllerXmlComments: true);
+            }
+
+            //添加2个过滤器
+            c.DocumentFilter<SetVersionInPathDocumentFilter>();
+
             #region 开启JWT
 
-            if (colaSwaggerConfigOption.EnableJwt)
+            if (colaSwaggerConfigOptions.EnableJwt)
             {
-                u.OperationFilter<SecurityRequirementsOperationFilter>();
-                u.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
+                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
                     Description = "JWT授权(数据将在请求头中进行传输)直接在下框中输入Bearer token (注意 Bearer 和 token 之间有一个空格)",
                     Name = "Authorization",
                     //jwt默认存放 Authorization 信息的位置（请求头中）
-                    In = ParameterLocation.Header, 
+                    In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey
                 });
             }
 
             #endregion
-            
         });
-        
+        return services;
+    }
+}
+
+
+public class SetVersionInPathDocumentFilter: IDocumentFilter
+{
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        var updatedPaths = new OpenApiPaths();
+        foreach (var entry in swaggerDoc.Paths)
+        {
+            updatedPaths.Add(
+                entry.Key.Replace("v{version}", swaggerDoc.Info.Version),
+                entry.Value);
+        }
+        swaggerDoc.Paths = updatedPaths;
     }
 }

@@ -5,10 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cola.ColaMiddleware.ColaIpRateLimit;
-
+/// <summary>
+/// ColaIpRateLimitInject - cola ip rete limit inject
+/// </summary>
 public static class ColaIpRateLimitInject
 {
-    public static IServiceCollection AddSingletonColaIpRateLimit(
+    public static IServiceCollection AddColaIpRateLimit(
         this IServiceCollection services,
         Action<ColaIpRateLimitOptions> action)
     {
@@ -31,7 +33,7 @@ public static class ColaIpRateLimitInject
         return services;
     }
     
-    public static IServiceCollection AddSingletonColaIpRateLimit(this IServiceCollection services, IConfiguration config)
+    public static IServiceCollection AddColaIpRateLimit(this IServiceCollection services, IConfiguration config)
     {
         
         var colaIpRateLimitOptions = config.GetSection(SystemConstant.CONSTANT_COLAIPRATELIMIT_SECTION);
