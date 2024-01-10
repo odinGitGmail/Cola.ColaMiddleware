@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Cola.Core.ColaConsole;
 using Cola.Core.Utils.Constants;
 using Cola.CoreUtils.Extensions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -20,13 +21,17 @@ public static class ColaSwaggerInject
     {
         var colaSwaggerConfig = new ColaSwaggerConfigOption();
         action(colaSwaggerConfig);
-        return InjectColaSwagger(services, colaSwaggerConfig);
+        services = InjectColaSwagger(services, colaSwaggerConfig);
+        ConsoleHelper.WriteInfo("ColaSwagger 注入");
+        return services;
     }
     
     public static IServiceCollection AddColaSwagger(this IServiceCollection services, IConfiguration config)
     {
         var colaSwaggerConfig = config.GetSection(SystemConstant.CONSTANT_COLASWAGGER_SECTION).Get<ColaSwaggerConfigOption>();
-        return InjectColaSwagger(services, colaSwaggerConfig);
+        services = InjectColaSwagger(services, colaSwaggerConfig);
+        ConsoleHelper.WriteInfo("ColaSwagger 注入");
+        return services;
     }
 
     private static IServiceCollection InjectColaSwagger(IServiceCollection services,

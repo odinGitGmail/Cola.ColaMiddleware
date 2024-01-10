@@ -1,4 +1,5 @@
-﻿using Cola.Core.Utils.Constants;
+﻿using Cola.Core.ColaConsole;
+using Cola.Core.Utils.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +15,9 @@ public static class ColaVersioningInject
     {
         var colaVersioningOption = new ColaVersioningOption();
         action(colaVersioningOption);
-        return InjectColaVersion(services, colaVersioningOption);
+        services = InjectColaVersion(services, colaVersioningOption);
+        ConsoleHelper.WriteInfo("ColaVersioning 注入");
+        return services;
     }
 
     public static IServiceCollection AddColaVersioning(
@@ -24,7 +27,9 @@ public static class ColaVersioningInject
         var colaVersioningOption = config.GetSection(SystemConstant.CONSTANT_COLAVERSIONING_SECTION)
             .Get<ColaVersioningOption>();
         colaVersioningOption ??= new ColaVersioningOption();
-        return InjectColaVersion(services, colaVersioningOption);
+        services = InjectColaVersion(services, colaVersioningOption);
+        ConsoleHelper.WriteInfo("ColaVersioning 注入");
+        return services;
     }
 
     private static IServiceCollection InjectColaVersion(IServiceCollection services,

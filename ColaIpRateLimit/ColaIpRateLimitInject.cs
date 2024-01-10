@@ -1,5 +1,6 @@
 ﻿using AspNetCoreRateLimit;
 using AspNetCoreRateLimit.Redis;
+using Cola.Core.ColaConsole;
 using Cola.Core.Utils.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,7 @@ public static class ColaIpRateLimitInject
         services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
         services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
         services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+        ConsoleHelper.WriteInfo("ColaIpRateLimit 注入");
         return services;
     }
     
@@ -54,6 +56,7 @@ public static class ColaIpRateLimitInject
         services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
         services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
         services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+        ConsoleHelper.WriteInfo("ColaIpRateLimit 注入");
         return services;
     }
 }
