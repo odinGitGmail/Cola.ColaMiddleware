@@ -28,7 +28,7 @@ public static class ColaSwaggerInject
     
     public static IServiceCollection AddColaSwagger(this IServiceCollection services, IConfiguration config)
     {
-        var colaSwaggerConfig = config.GetSection(SystemConstant.CONSTANT_COLASWAGGER_SECTION).Get<ColaSwaggerConfigOption>();
+        var colaSwaggerConfig = config.GetColaSection<ColaSwaggerConfigOption>(SystemConstant.CONSTANT_COLASWAGGER_SECTION);
         services = InjectColaSwagger(services, colaSwaggerConfig);
         ConsoleHelper.WriteInfo("ColaSwagger 注入");
         return services;
