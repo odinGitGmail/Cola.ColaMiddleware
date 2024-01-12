@@ -22,18 +22,10 @@
         <EmbeddedResource Include="icon.png">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </EmbeddedResource>
-        <None Update="ColaSwagger\readme.md">
-          <Pack>true</Pack>
-          <PackagePath>\</PackagePath>
-        </None>
-        <None Update="ColaIpRateLimit\README.md">
-          <Pack>true</Pack>
-          <PackagePath>\</PackagePath>
-        </None>
-        <None Update="ColaVersioning\README.md">
-          <Pack>true</Pack>
-          <PackagePath>\</PackagePath>
-        </None>
+        <None Include="readme.md" Pack="true" PackagePath="\"/>
+        <None Include="ColaSwagger\readme.md" Pack="true" PackagePath="\"/>
+        <None Include="ColaIpRateLimit\readme.md" Pack="true" PackagePath="\"/>
+        <None Include="ColaVersioning\readme.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
