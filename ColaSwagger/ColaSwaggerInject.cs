@@ -37,80 +37,126 @@ public static class ColaSwaggerInject
     private static IServiceCollection InjectColaSwagger(IServiceCollection services,
         ColaSwaggerConfigOption colaSwaggerConfigOptions)
     {
-        var provider = services.BuildServiceProvider().GetRequiredService<IApiVersionDescriptionProvider>();
-        // swagger
-        services.AddSwaggerGen(c =>
+        var provider = services.BuildServiceProvider().GetService<IApiVersionDescriptionProvider>();
+        if (provider != null)
         {
-            // 排序方式
-            c.OrderActionsBy(o => o.HttpMethod);
-            foreach (var item in provider.ApiVersionDescriptions)
+            // swagger
+            services.AddSwaggerGen(c =>
             {
-                var option = colaSwaggerConfigOptions.ColaSwaggerConfigModels.Single(c => c.Version == item.GroupName);
-                c.SwaggerDoc(item.GroupName, new OpenApiInfo
+                // 排序方式
+                c.OrderActionsBy(o => o.HttpMethod);
+                foreach (var item in provider.ApiVersionDescriptions)
                 {
-                    Title = $"{option.Title} {item.GroupName}",
-                    Description = option.Description,
-                    Version = item.ApiVersion.MajorVersion.ToString() + "." + item.ApiVersion.MinorVersion,
-                    Contact = new OpenApiContact()
+                    var option =
+                        colaSwaggerConfigOptions.ColaSwaggerConfigModels.Single(c => c.Version == item.GroupName);
+                    c.SwaggerDoc(item.GroupName, new OpenApiInfo
                     {
-                        Name = option.OpenApiContact.Name,
-                        Url = option.OpenApiContact.Url,
-                        Email = option.OpenApiContact.Email
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = option.OpenApiLicense.Name,
-                        Url = option.OpenApiLicense.Url
-                    }
-                });
+                        Title = $"{option.Title} {item.GroupName}",
+                        Description = option.Description,
+                        Version = item.ApiVersion.MajorVersion + "." + item.ApiVersion.MinorVersion,
+                        Contact = new OpenApiContact()
+                        {
+                            Name = option.OpenApiContact.Name,
+                            Url = option.OpenApiContact.Url,
+                            Email = option.OpenApiContact.Email
+                        },
+                        License = new OpenApiLicense
+                        {
+                            Name = option.OpenApiLicense.Name,
+                            Url = option.OpenApiLicense.Url
+                        }
+                    });
 
-            }
+                }
 
-            // 重载方式
-            c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+                // 重载方式
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 
-            foreach (var name in Directory.GetFiles(AppContext.BaseDirectory, "*.*",
-                         SearchOption.AllDirectories).Where(f => Path.GetExtension(f).ToLower() == ".xml"))
-            {
-                c.IncludeXmlComments(name, includeControllerXmlComments: true);
-            }
-
-            //添加2个过滤器
-            c.DocumentFilter<SetVersionInPathDocumentFilter>();
-
-            #region 开启JWT
-
-            if (colaSwaggerConfigOptions.EnableJwt)
-            {
-                c.OperationFilter<SecurityRequirementsOperationFilter>();
-                c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                foreach (var name in Directory.GetFiles(AppContext.BaseDirectory, "*.*",
+                             SearchOption.AllDirectories).Where(f => Path.GetExtension(f).ToLower() == ".xml"))
                 {
-                    Description = "JWT授权(数据将在请求头中进行传输)直接在下框中输入Bearer token (注意 Bearer 和 token 之间有一个空格)",
-                    Name = "Authorization",
-                    //jwt默认存放 Authorization 信息的位置（请求头中）
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey
-                });
-            }
+                    c.IncludeXmlComments(name, includeControllerXmlComments: true);
+                }
 
-            #endregion
-        });
-        return services;
-    }
-}
+                //添加2个过滤器
+                c.DocumentFilter<SetVersionInPathDocumentFilter>();
 
+                #region 开启JWT
 
-public class SetVersionInPathDocumentFilter: IDocumentFilter
-{
-    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
-    {
-        var updatedPaths = new OpenApiPaths();
-        foreach (var entry in swaggerDoc.Paths)
-        {
-            updatedPaths.Add(
-                entry.Key.Replace("v{version}", swaggerDoc.Info.Version),
-                entry.Value);
+                if (colaSwaggerConfigOptions.EnableJwt)
+                {
+                    c.OperationFilter<SecurityRequirementsOperationFilter>();
+                    c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                    {
+                        Description = "JWT授权(数据将在请求头中进行传输)直接在下框中输入Bearer token (注意 Bearer 和 token 之间有一个空格)",
+                        Name = "Authorization",
+                        //jwt默认存放 Authorization 信息的位置（请求头中）
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey
+                    });
+                }
+
+                #endregion
+            });
         }
-        swaggerDoc.Paths = updatedPaths;
+        else
+        {
+            // swagger
+            services.AddSwaggerGen(c =>
+            {
+                var swaggerModel = colaSwaggerConfigOptions.ColaSwaggerConfigModels[0];
+                // 排序方式
+                c.SwaggerDoc(
+                    swaggerModel.Version,
+                    new OpenApiInfo
+                    {
+                        Title = $"{swaggerModel.Title}",
+                        Description = swaggerModel.Description,
+                        Version = swaggerModel.Version,
+                        Contact = new OpenApiContact()
+                        {
+                            Name = swaggerModel.OpenApiContact.Name,
+                            Url = swaggerModel.OpenApiContact.Url,
+                            Email = swaggerModel.OpenApiContact.Email
+                        },
+                        License = new OpenApiLicense
+                        {
+                            Name = swaggerModel.OpenApiLicense.Name,
+                            Url = swaggerModel.OpenApiLicense.Url
+                        }
+                    });
+
+                // 重载方式
+                c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+
+                foreach (var name in Directory.GetFiles(AppContext.BaseDirectory, "*.*",
+                             SearchOption.AllDirectories).Where(f => Path.GetExtension(f).ToLower() == ".xml"))
+                {
+                    c.IncludeXmlComments(name, includeControllerXmlComments: true);
+                }
+
+                //添加2个过滤器
+                c.DocumentFilter<SetVersionInPathDocumentFilter>();
+
+                #region 开启JWT
+
+                if (colaSwaggerConfigOptions.EnableJwt)
+                {
+                    c.OperationFilter<SecurityRequirementsOperationFilter>();
+                    c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                    {
+                        Description = "JWT授权(数据将在请求头中进行传输)直接在下框中输入Bearer token (注意 Bearer 和 token 之间有一个空格)",
+                        Name = "Authorization",
+                        //jwt默认存放 Authorization 信息的位置（请求头中）
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey
+                    });
+                }
+
+                #endregion
+            });
+        }
+
+        return services;
     }
 }

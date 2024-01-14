@@ -12,21 +12,30 @@ public static class ColaSwaggerMiddlewareExtensions
     /// UseColaSwagger - Register the SwaggerUI middleware with optional setup action for DI-injected options
     /// </summary>
     /// <param name="app">Can be fully qualified or relative to the current host</param>
-    /// <param name="url">Can be fully qualified or relative to the current host</param>
-    /// <param name="name">The description that appears in the document selector drop-down</param>
-    /// <param name="routePrefix">The swagger routePrefix,if change must edit launchSettings.json launchUrl node</param>
+    /// <param name="urlAndName">Can be fully qualified or relative to the current host</param>
     /// <returns></returns>
     public static IApplicationBuilder UseColaSwagger(this IApplicationBuilder app, Dictionary<string,string> urlAndName)
     {
         app.UseSwagger();
             
-        var provider = app.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
+        var provider = app.ApplicationServices.GetService<IApiVersionDescriptionProvider>();
         app.UseSwaggerUI(c =>
         {
-            foreach (var item in provider.ApiVersionDescriptions) 
+            if (provider != null)
             {
-                c.SwaggerEndpoint($"/swagger/{item.GroupName}/swagger.json", item.GroupName);
+                foreach (var item in provider.ApiVersionDescriptions) 
+                {
+                    c.SwaggerEndpoint($"/swagger/{item.GroupName}/swagger.json", item.GroupName);
+                }
             }
+            else
+            {
+                foreach (var item in urlAndName.Keys)
+                {
+                    c.SwaggerEndpoint(item, urlAndName[item]);
+                }
+            }
+            
         });
         return app;
     }
