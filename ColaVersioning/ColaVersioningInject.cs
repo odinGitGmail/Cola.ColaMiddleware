@@ -1,5 +1,5 @@
 ﻿using Cola.Core.ColaConsole;
-using Cola.Core.Utils.Constants;
+using Cola.CoreUtils.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;

@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Cola.Core.ColaConsole;
-using Cola.Core.Utils.Constants;
+using Cola.CoreUtils.Constants;
 using Cola.CoreUtils.Extensions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;

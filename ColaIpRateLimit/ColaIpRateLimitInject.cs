@@ -1,7 +1,7 @@
 ﻿using AspNetCoreRateLimit;
 using AspNetCoreRateLimit.Redis;
 using Cola.Core.ColaConsole;
-using Cola.Core.Utils.Constants;
+using Cola.CoreUtils.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
