@@ -2,6 +2,7 @@
 using Cola.Core.ColaConsole;
 using Cola.CoreUtils.Constants;
 using Cola.CoreUtils.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,8 @@ public static class ColaSwaggerInject
             // swagger
             services.AddSwaggerGen(c =>
             {
+                c.OperationFilter<Filters.ReApplyOptionalRouteParameterOperationFilter<RouteAttribute>>();
+                // c.EnableAnnotations();
                 // 排序方式
                 c.OrderActionsBy(o => o.HttpMethod);
                 foreach (var item in provider.ApiVersionDescriptions)
@@ -80,7 +83,6 @@ public static class ColaSwaggerInject
 
                 //添加2个过滤器
                 c.DocumentFilter<SetVersionInPathDocumentFilter>();
-
                 #region 开启JWT
 
                 if (colaSwaggerConfigOptions.EnableJwt)
@@ -104,6 +106,7 @@ public static class ColaSwaggerInject
             // swagger
             services.AddSwaggerGen(c =>
             {
+                c.OperationFilter<Filters.ReApplyOptionalRouteParameterOperationFilter<RouteAttribute>>();
                 var swaggerModel = colaSwaggerConfigOptions.ColaSwaggerConfigModels[0];
                 // 排序方式
                 c.SwaggerDoc(
