@@ -4,6 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Version>1.0.3</Version>
         <Title>Cola.ColaMiddleware</Title>
         <Authors>OdinSam</Authors>
         <Description>Cola.ColaMiddleware 中间件框架</Description>
@@ -11,10 +12,9 @@
         <PackageProjectUrl>https://github.com/odinGitGmail/Cola.ColaMiddleware</PackageProjectUrl>
         <RepositoryUrl>https://github.com/odinGitGmail/Cola.ColaMiddleware</RepositoryUrl>
         <PackageTags>Cola;Middleware</PackageTags>
-        <Version>1.0.1</Version>
         <PackageIcon>icon.png</PackageIcon>
-        <AssemblyVersion>1.0.1</AssemblyVersion>
-        <FileVersion>1.0.1</FileVersion>
+        <AssemblyVersion>1.0.3</AssemblyVersion>
+        <FileVersion>1.0.3</FileVersion>
         <PackageReadmeFile>./readme.md</PackageReadmeFile>
     </PropertyGroup>
     <ItemGroup>

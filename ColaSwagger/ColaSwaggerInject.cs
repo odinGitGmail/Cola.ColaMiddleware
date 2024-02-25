@@ -50,26 +50,28 @@ public static class ColaSwaggerInject
                 c.OrderActionsBy(o => o.HttpMethod);
                 foreach (var item in provider.ApiVersionDescriptions)
                 {
-                    var option =
-                        colaSwaggerConfigOptions.ColaSwaggerConfigModels.Single(c => c.Version == item.GroupName);
-                    c.SwaggerDoc(item.GroupName, new OpenApiInfo
+                    if (colaSwaggerConfigOptions.ColaSwaggerConfigModels != null)
                     {
-                        Title = $"{option.Title} {item.GroupName}",
-                        Description = option.Description,
-                        Version = item.ApiVersion.MajorVersion + "." + item.ApiVersion.MinorVersion,
-                        Contact = new OpenApiContact()
+                        var option =
+                            colaSwaggerConfigOptions.ColaSwaggerConfigModels.Single(colaSwaggerConfigModel => colaSwaggerConfigModel.Version == item.GroupName);
+                        c.SwaggerDoc(item.GroupName, new OpenApiInfo
                         {
-                            Name = option.OpenApiContact.Name,
-                            Url = option.OpenApiContact.Url,
-                            Email = option.OpenApiContact.Email
-                        },
-                        License = new OpenApiLicense
-                        {
-                            Name = option.OpenApiLicense.Name,
-                            Url = option.OpenApiLicense.Url
-                        }
-                    });
-
+                            Title = $"{option.Title} {item.GroupName}",
+                            Description = option.Description,
+                            Version = item.ApiVersion.MajorVersion + "." + item.ApiVersion.MinorVersion,
+                            Contact = new OpenApiContact()
+                            {
+                                Name = option.OpenApiContact.Name,
+                                Url = option.OpenApiContact.Url,
+                                Email = option.OpenApiContact.Email
+                            },
+                            License = new OpenApiLicense
+                            {
+                                Name = option.OpenApiLicense.Name,
+                                Url = option.OpenApiLicense.Url
+                            }
+                        });
+                    }
                 }
 
                 // 重载方式
@@ -107,7 +109,7 @@ public static class ColaSwaggerInject
             services.AddSwaggerGen(c =>
             {
                 c.OperationFilter<Filters.ReApplyOptionalRouteParameterOperationFilter<RouteAttribute>>();
-                var swaggerModel = colaSwaggerConfigOptions.ColaSwaggerConfigModels[0];
+                var swaggerModel = colaSwaggerConfigOptions.ColaSwaggerConfigModels![0];
                 // 排序方式
                 c.SwaggerDoc(
                     swaggerModel.Version,

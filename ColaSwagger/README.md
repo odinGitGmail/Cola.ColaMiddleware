@@ -33,9 +33,12 @@ var config = builder.Configuration;
 builder.Services.AddColaSwagger(config);
 
 // 注释并添加中间件
-// app.UseSwagger();
-// app.UseSwaggerUI();
-app.UseColaSwagger("/swagger/v1/swagger.json", "WebApi V1",null);
+app.UseSwagger();
+app.UseColaSwagger(new Dictionary<string, string>()
+    {
+        {"/swagger/v1/swagger.json", "WebApi V1"},
+        {"/swagger/v2/swagger.json", "WebApi V2"}
+    });
 ```
 
 

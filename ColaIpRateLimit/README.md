@@ -112,7 +112,7 @@ Client速率限制策略 - ClientRateLimitPolicies
 builder.Configuration.AddJsonFile("appsettings.json");
 var config = builder.Configuration;
 // 添加 IpRateLimit 注入 默认使用内存缓存，如果使用redis缓存
-builder.Services.AddSingletonColaIpRateLimit(config);
+builder.Services.AddColaIpRateLimit(config);
 
 // 添加 IpRateLimit 中间件，尽量添加在管道到外层
 app.UseIpRateLimiting();
