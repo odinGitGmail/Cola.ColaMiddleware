@@ -21,8 +21,6 @@ public class SysCurrentUser : ISysCurrentUser
         return new TokenUserInfo()
         {
             CurrentUserId = GetClaimValueByType(JwtRegisteredClaimNames.Jti)!.FirstOrDefault()!,
-            CurrentLoginName = GetClaimValueByType(JwtRegisteredClaimNames.Sub)!.FirstOrDefault()!,
-            CurrentUserName = _accessor.HttpContext!.User.Identity!.Name!,
         };
     }
     
